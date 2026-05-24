@@ -1,11 +1,9 @@
-FROM tomcat:9.0-jdk17-temurin
-
-LABEL maintainer="Vishnuraj"
-
-RUN rm -rf /usr/local/tomcat/webapps/*
-
-COPY target/myproject.war /usr/local/tomcat/webapps/ROOT.war
-
+FROM tomcat:9.0-jdk11
+LABEL maintainer="vishnuraj@oracle.com"
 EXPOSE 8080
 
-CMD ["catalina.sh", "run"]
+# Delete default Tomcat apps so yours loads on /
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+# Deploy as ROOT.war = root URL
+COPY target/myproject.war /usr/local/tomcat/webapps/ROOT.war
