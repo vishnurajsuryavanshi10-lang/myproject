@@ -2,31 +2,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: myproject-deployment
+  name: mavenwebapp-deployment
 spec:
   replicas: 2
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
-      app: myproject
+      app: mavenwebapp
   template:
     metadata:
       labels:
-        app: myproject
+        app: mavenwebapp
     spec:
       containers:
-      - name: myproject
-        image: yourusername/myproject:latest  # <-- change this
+      - name: mavenwebapp
+        image: vishnurajit/mavenwebapp:latest
         ports:
         - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: myproject-service
+  name: mavenwebapp-service
 spec:
   type: LoadBalancer
   selector:
-    app: myproject
+    app: mavenwebapp
   ports:
-    - port: 80
+    - protocol: TCP
+      port: 80
       targetPort: 8080
