@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myproject-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myproject
+  template:
+    metadata:
+      labels:
+        app: myproject
+    spec:
+      containers:
+      - name: myproject
+        image: yourusername/myproject:latest  # <-- change this
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myproject-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: myproject
+  ports:
+    - port: 80
+      targetPort: 8080
