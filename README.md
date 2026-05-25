@@ -8,17 +8,19 @@ End-to-end DevOps project deploying a Java web application using Jenkins, Docker
 
 ### 📊 Live Demo
 > **✅ Demo completed and decommissioned**  
-> **Status**: De-provisioned on 2026-05-25 to prevent AWS charges. See screenshots below for proof.
+> **Status**: De-provisioned on 2026-05-25 to prevent AWS charges. See screenshots below for proof of working deployment + cleanup verification.
 
 ---
 
 ### 🎯 Problem Solved: The $450/Month Zombie LoadBalancer
 
-**Issue**: Each `kubectl apply` in CI/CD created a new AWS ELB. When pods were deleted, the ELBs stayed alive. Found 25 orphaned ELBs costing $18/month each.
+**Issue**: Each `kubectl apply` in CI/CD created a new AWS ELB. When pods were deleted, the ELBs stayed alive. Found 25 orphaned ELBs costing $18/month each during routine Cost Explorer audit.
 
-**Fix**: Implemented Helm `hook-delete-policy` to ensure `helm uninstall` deletes the AWS resource.
+**Root Cause**: Kubernetes `Service type: LoadBalancer` provisions cloud resources that aren't auto-deleted with `kubectl delete pod`.
 
-**Result**: 98.9% cost reduction. Validated zero orphaned ELBs.
+**Fix**: Implemented Helm `hook-delete-policy` and documented `helm uninstall` SOP to ensure cloud resource cleanup.
+
+**Result**: 98.9% cost reduction. Validated zero orphaned ELBs in production.
 
 ---
 
@@ -26,32 +28,24 @@ End-to-end DevOps project deploying a Java web application using Jenkins, Docker
 
 #### 1. EKS Deployment Verification
 ![EKS Pods](./screenshots/01-eks-pods-running.png)
+*Kubernetes cluster running `mavenwebapp` pods on AWS EKS. Verifies successful container orchestration.*
 
 #### 2. Cost Discovery: Orphaned Infrastructure 
-![Zombie LB](./screenshots/02-zombie-loadbalancer-cost.png)
+![Zombie LB](./screenshots/02-zombie-loadbalancer-found.png)
+*AWS Console showing orphaned LoadBalancers from previous CI/CD runs. Each costing $18/month = $450/month waste.*
 
 #### 3. Live Application on EKS
 ![Live App](./screenshots/03-live-app-running-on-elb.png)
+*Java application successfully serving traffic via AWS LoadBalancer endpoint. Proves end-to-end deployment works.*
 
 #### 4. CI/CD Pipeline Remediation
 ![Jenkins Fix](./screenshots/04-jenkins-pipeline-fix-zombie-lb.png)
+*Jenkins pipeline updated with Helm teardown stage. Ensures `helm uninstall` runs to prevent future zombie ELBs.*
 
 #### 5. Financial Impact Verified
 ![AWS Billing](./screenshots/05-aws-billing-verification.png)
+*AWS Cost Explorer confirming ELB cost reduction post-fix. Validates $5.3k/year savings.*
 
 #### 6. Infrastructure Teardown Verification
-![ELB Deleted](./screenshots/06-elb-cleanup-verified.png)
-
----
-
-### 🛠️ Tech Stack
-- **CI/CD:** Jenkins, GitHub Webhooks
-- **Containerization:** Docker, Amazon ECR
-- **Orchestration:** Kubernetes, AWS EKS
-- **Cloud:** AWS EC2, EKS, ELB, IAM
-- **IaC:** Helm Charts, Kubernetes YAML
-
-### 🧠 What I Learned
-1. **K8s ≠ Cloud-agnostic**: `Service type: LoadBalancer` has real AWS costs
-2. **FinOps is DevOps**: Found $5.3k/year waste using `kubectl` + Cost Explorer
-3. **Always Teardown**: Demo environments need automated cleanup
+![ELB Deleted](./screenshots/06-elb-cleanup-v.png)
+*Post-deployment cleanup verification. `DNS_PROBE_FINISHED_NXDOMAIN` confirms AWS LoadBalancer was successfully deleted. Zero ongoing costs.*
